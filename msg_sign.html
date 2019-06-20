@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>数字货币财产验证工具 front-end</title>
+    <script language="javascript" type="text/javascript"
+            src="jquery-3.3.1.min.js"></script>
+    <script language="javascript" type="text/javascript"
+            src="web3.min.js"></script>
+</head>
+<body>
+
+    <h2>财产信息</h2><br><br>
+    <button type="button" onclick="GetAccountInfo()">账户地址</button><br><br>
+    账户地址<div id="account_address"></div><br><br><br><br>
+    <button type="button" onclick="GetBalanceInfo()">账户地址</button><br><br>
+    账户余额<div id="account_balance"></div><br><br><br><br>
+
+    <h2>财产账户签名</h2><br><br>
+
+    需要签名的信息: <input type='text' id="msg" value=""><br>
+    <button type="button" onclick="Sign()">确定</button><br><br>
+    生成的签名地址<div id="sign_data"></div><br><br><br><br>
+
+    <h2>验证财产账户签名</h2><br><br>
+
+    需要验证的签名: <input type='text' id="signdata" value=""><br>
+    签名的消息:<input type='text' id="msg2" value=""><br>
+    <button type="button" onclick="Recover()">确定</button>
+    生成的账户地址:<div id="produce_account"></div><br><br><br><br>
+<script>
+    web3 = new Web3("ws://localhost:8545");
+    var account;
+
+    function GetAccountInfo() {
+        web3.eth.getAccounts().then(function (receipt) {
+            account = receipt[0];
+            $("#account_address").text(account);
+            })
+    }
+
+    function GetBalanceInfo() {
+        web3.eth.getBalance(account).then(function (receipt) {
+            var balance = receipt;
+            $("#account_balance").text(balance);
+            })
+    }
+
+    function Sign() {
+        var msg_ele = document.getElementById('msg');
+        var msg = msg_ele.value;
+        console.log("xxxxxxxx", msg);
+        var message = "\x19Ethereum Signed Message:\n" + msg.length + msg;
+        var messageHash = web3.utils.sha3(message);
+        console.log("messageHash", messageHash);
+        var account = "0x10d7153ed8400Ee811e17677a4BA5BAA77baBD2c";
+        web3.eth.sign(messageHash, account).then(function (receipt) {
+            var signdata = receipt
+            console.log("signdata", signdata);
+            $("#sign_data").text(signdata);
+        })
+    }
+
+    function Recover() {
+        var msg2_ele = document.getElementById('msg2');
+        var signdata_ele = document.getElementById('signdata');
+        var signdata = signdata_ele.value;
+        var msg2 = msg2_ele.value;
+        console.log("xxxxxxxx", signdata);
+        var message2 = "\x19Ethereum Signed Message:\n" + msg2.length + msg2;
+        var messageHash2 = web3.utils.sha3(message2);
+        console.log("messageHash2", messageHash2);
+        var account2 = web3.eth.accounts.recover(messageHash2, signdata);
+        console.log("account2",account2);
+        $("#produce_account").text(account2);
+    }
+
+</script>
+</body>
+</html>
+
